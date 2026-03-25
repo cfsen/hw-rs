@@ -50,7 +50,7 @@ impl HWMessageKind {
             13 => Ok(HWMessageKind::RoundtripReq),
             14 => Ok(HWMessageKind::RoundtripDone),
             100 => Ok(HWMessageKind::Generic),
-            _ => Err(HyprwireError::WIP)
+            _ => Err(HyprwireError::MessageKindUnknownKey)
         }
     }
 }
@@ -67,7 +67,7 @@ impl TryFrom<&Option<&u8>> for HWMessageKind {
     fn try_from(value: &Option<&u8>) -> Result<Self, Self::Error> {
         match value {
             Some(v) => HWMessageKind::match_u8(v),
-            None => Err(HyprwireError::WIP),
+            None => Err(HyprwireError::MessageKindTryFrom),
         }
     }
 }
@@ -77,7 +77,7 @@ impl TryFrom<&[u8]> for HWMessageKind {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         match value.get(0) {
             Some(v) => HWMessageKind::match_u8(v),
-            None => Err(HyprwireError::WIP),
+            None => Err(HyprwireError::MessageKindTryFrom),
         }
     }
 }
@@ -125,7 +125,7 @@ impl HWMagic {
             0x21 => Ok(HWMagic::Array),
             0x22 => Ok(HWMagic::Object),
             0x40 => Ok(HWMagic::Fd),
-            _ => Err(HyprwireError::WIP),
+            _ => Err(HyprwireError::MagicUnknownKey),
         }
     }
     pub fn get_length(key: HWMagic) -> Option<usize> {
@@ -149,7 +149,7 @@ impl TryFrom<&Option<&u8>> for HWMagic {
     fn try_from(value: &Option<&u8>) -> Result<Self, Self::Error> {
         match value {
             Some(v) => HWMagic::match_u8(v),
-            None => Err(HyprwireError::WIP),
+            None => Err(HyprwireError::MagicTryFrom),
         }
     }
 }
@@ -159,7 +159,7 @@ impl TryFrom<&[u8]> for HWMagic {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         match value.get(0) {
             Some(v) => HWMagic::match_u8(v),
-            None => Err(HyprwireError::WIP),
+            None => Err(HyprwireError::MagicTryFrom),
         }
     }
 }
@@ -180,18 +180,18 @@ pub enum HWValue {
 impl HWValue {
     fn decode_string(bin: &[u8]) -> Result<String, HyprwireError> {
         String::from_utf8(bin.to_vec())
-            .map_err(|_| HyprwireError::WIP)
+            .map_err(|e| HyprwireError::DecodeBinUtf8(e))
     }
     fn decode_u32(bin: &[u8]) -> Result<u32, HyprwireError> {
-        let bytes: [u8; 4] = bin.try_into().map_err(|_| HyprwireError::WIP)?;
+        let bytes: [u8; 4] = bin.try_into().map_err(|e| HyprwireError::DecodeBinU32(e))?;
         Ok(u32::from_le_bytes(bytes))
     }
     fn decode_i32(bin: &[u8]) -> Result<i32, HyprwireError> {
-        let bytes: [u8; 4] = bin.try_into().map_err(|_| HyprwireError::WIP)?;
+        let bytes: [u8; 4] = bin.try_into().map_err(|e| HyprwireError::DecodeBinI32(e))?;
         Ok(i32::from_le_bytes(bytes))
     }
     fn decode_f32(bin: &[u8]) -> Result<f32, HyprwireError> {
-        let bytes: [u8; 4] = bin.try_into().map_err(|_| HyprwireError::WIP)?;
+        let bytes: [u8; 4] = bin.try_into().map_err(|e| HyprwireError::DecodeBinF32(e))?;
         Ok(f32::from_le_bytes(bytes))
     }
     fn array_kind_branch(bin: &[u8]) -> Result<Self, HyprwireError> {
@@ -203,7 +203,7 @@ impl HWValue {
             HWMagic::Seq => Ok(HWValue::ArrayUint(Self::array_walk(magic, &bin[1..], Self::decode_u32)?)),
             HWMagic::ObjectId => Ok(HWValue::ArrayUint(Self::array_walk(magic, &bin[1..], Self::decode_u32)?)),
             HWMagic::Varchar => Ok(HWValue::ArrayVarchar(Self::array_walk(magic, &bin[1..], Self::decode_string)?)),
-            _ => Err(HyprwireError::WIP)
+            _ => Err(HyprwireError::DecodeBinArrayNoMatch)
         }
     }
     fn array_walk<F, T>(
@@ -213,7 +213,8 @@ impl HWValue {
     ) -> Result<Vec<T>, HyprwireError> where
         F: Fn(&[u8]) -> Result<T, HyprwireError>,
     {
-        let Some((array_len, array_len_offset)) = VLQ::decode(&bin[..]) else { return Err(HyprwireError::WIP); };
+        let Some((array_len, array_len_offset)) = VLQ::decode(&bin[..])
+        else { return Err(HyprwireError::ArrayWalkVLQ); };
 
         let mut cursor = array_len_offset;
 
@@ -224,10 +225,10 @@ impl HWValue {
             match kind {
                 HWMagic::Varchar => {
                     let Some((data_len, vlq_offset)) = VLQ::decode(&bin[cursor..]) 
-                    else { return Err(HyprwireError::WIP); };
+                    else { return Err(HyprwireError::ArrayWalkVarCharVLQ); };
 
                     let value = decoder(&bin[cursor+vlq_offset..cursor+vlq_offset+data_len as usize].to_vec())
-                        .map_err(|_| HyprwireError::WIP)?;
+                        .map_err(|_| HyprwireError::ArrayWalkVarCharValue)?; // TODO: bubble error
 
                     values.push(value);
                     offset = vlq_offset;
@@ -235,7 +236,7 @@ impl HWValue {
                 _ => {
                     let bytes: [u8; 4] = bin[cursor..cursor+4]
                         .try_into()
-                        .map_err(|_| HyprwireError::WIP)?;
+                        .map_err(|_| HyprwireError::ArrayWalkDecoderValue)?; // TODO: bubble error
 
                     let value = decoder(&bytes)?;
 
