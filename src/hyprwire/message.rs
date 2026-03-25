@@ -59,7 +59,7 @@ impl TryFrom<&mut UnixStream> for HWMessage {
     fn try_from(stream: &mut UnixStream) -> Result<Self, Self::Error> {
         let mut buf = [0u8; 4096];
         let n = stream.read(&mut buf)
-            .map_err(|_| HyprwireError::WIP)?;
+            .map_err(|e| HyprwireError::MessageStreamRead(e))?;
 
         println!("--- rx ---");
         println!("stream: {:?}", &buf[..n]);
