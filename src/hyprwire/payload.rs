@@ -5,8 +5,8 @@ use crate::hyprwire::{error::HyprwireError, types::{HWMagic, HWValue}, vlq::VLQ}
 
 
 pub struct HWPayload {
-    magic: HWMagic,
-    value: HWValue,
+    pub magic: HWMagic,
+    pub value: HWValue,
 }
 impl HWPayload {
     pub fn compose_uint(uint: u32) -> Self {
