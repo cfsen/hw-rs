@@ -5,7 +5,7 @@ use std::fmt::Display;
 use crate::hyprwire::{error::HyprwireError, vlq::VLQ};
 
 #[repr(u8)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum HWMessageKind {
     Invalid = 0,
     Sup = 1,
