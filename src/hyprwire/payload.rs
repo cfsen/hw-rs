@@ -104,10 +104,10 @@ impl HWPayload {
                     buf.extend(s.as_bytes());
                 }
             },
-            HWValue::Object(id, name) => {
+            HWValue::Object(id, _name) => { // TODO: clean up
                 buf.extend(id.to_le_bytes());
-                buf.extend(VLQ::encode(name.len() as u64));
-                buf.extend(name.as_bytes());
+                // buf.extend(VLQ::encode(name.len() as u64));
+                // buf.extend(name.as_bytes());
             }
             HWValue::Fd => { },
         }
