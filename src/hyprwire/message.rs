@@ -25,25 +25,25 @@ impl HWMessage {
             payload: vec![HWPayload::compose_varchar("VAX".to_string())],
         }
     }
-    pub fn template_hs_ack() -> Self {
+    pub fn template_hs_ack(version: u32) -> Self {
         HWMessage {
             kind: HWMessageKind::HandshakeAck,
-            payload: vec![HWPayload::compose_uint(1)],
+            payload: vec![HWPayload::compose_uint(version)],
         }
     }
-    pub fn template_bind_protocol() -> Self {
+    pub fn template_bind_protocol(seq: u32, protocol: &str, version: u32) -> Self {
         HWMessage { 
             kind: HWMessageKind::BindProtocol,
             payload: vec![
-                HWPayload::compose_uint(1), // seq
-                HWPayload::compose_varchar("hyprpaper_core".to_string()),
-                HWPayload::compose_uint(1), // version
+                HWPayload::compose_uint(seq),
+                HWPayload::compose_varchar(protocol.to_string()),
+                HWPayload::compose_uint(version),
             ],
         }
     }
     pub fn template_generic(object_id: u32, method_id: u32, args: Vec<HWPayload>) -> Self {
         let mut payload = vec![
-            HWPayload::compose_object_id(object_id),
+            HWPayload::compose_object(object_id, String::new()),
             HWPayload::compose_uint(method_id),
         ];
         payload.extend(args);
