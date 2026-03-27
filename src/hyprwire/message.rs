@@ -61,17 +61,11 @@ impl TryFrom<&mut UnixStream> for HWMessage {
         let n = stream.read(&mut buf)
             .map_err(|e| HyprwireError::MessageStreamRead(e))?;
 
-        println!("--- rx ---");
-        println!("stream: {:?}", &buf[..n]);
 
         let kind = HWMessageKind::try_from(&buf.get(0))?;
-        println!("kind: {}", kind);
-
         let magic = HWMagic::try_from(&buf.get(1))?;
-        println!("magic: {}", magic);
 
         let val = HWValue::from_slice(magic, &buf[2..n])?;
-        println!("val: {}", val);
 
         let payload = vec![HWPayload::from_magic_value(magic, val)];
 
