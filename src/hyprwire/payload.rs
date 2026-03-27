@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 
-use crate::hyprwire::{error::HyprwireError, types::{HWMagic, HWValue}, vlq::VLQ};
-
-
+use crate::hyprwire::{types::{HWMagic, HWValue}, vlq::VLQ};
 
 pub struct HWPayload {
     pub magic: HWMagic,
