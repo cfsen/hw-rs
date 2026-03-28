@@ -231,7 +231,7 @@ impl HWValue {
                         .map_err(|_| HyprwireError::ArrayWalkVarCharValue)?; // TODO: bubble error
 
                     values.push(value);
-                    offset = vlq_offset;
+                    offset = vlq_offset + data_len as usize;
                 },
                 _ => {
                     let bytes: [u8; 4] = bin[cursor..cursor+4]
