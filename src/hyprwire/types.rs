@@ -262,7 +262,8 @@ impl HWValue {
             HWMagic::Varchar => { HWValue::Varchar(Self::decode_string(bin)?) },
             HWMagic::Array => { Self::array_kind_branch(bin)? },
             HWMagic::Object => {
-                println!("error:from_slice: object type not supported yet");
+                println!("error:from_slice: missed object decoding detour, use HWMessage::try_from");
+                println!("error:from_slice:bin: {:?}", bin);
                 return Err(HyprwireError::WIP); // TODO: 
             },
             HWMagic::Fd => HWValue::Fd,
