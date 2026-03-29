@@ -227,7 +227,7 @@ impl HWValue {
                     let Some((data_len, vlq_offset)) = VLQ::decode(&bin[cursor..]) 
                     else { return Err(HyprwireError::ArrayWalkVarCharVLQ); };
 
-                    let value = decoder(&bin[cursor+vlq_offset..cursor+vlq_offset+data_len as usize].to_vec())
+                    let value = decoder(&bin[cursor+vlq_offset..cursor+vlq_offset+data_len as usize])
                         .map_err(|_| HyprwireError::ArrayWalkVarCharValue)?; // TODO: bubble error
 
                     values.push(value);
