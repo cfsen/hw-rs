@@ -71,10 +71,10 @@ impl HWMessage {
             match magic {
                 HWMagic::Varchar => {
                     let Some((data_len, vlq_offset)) = VLQ::decode(&bin[cursor..]) 
-                    else { return Err(HyprwireError::WIP); };
+                    else { return Err(HyprwireError::DecodeObjectVlq); };
 
                     let value = HWValue::from_slice(magic, &bin[cursor+vlq_offset..cursor+vlq_offset+data_len as usize])
-                        .map_err(|_| HyprwireError::WIP)?; // TODO: bubble error
+                        .map_err(|_| HyprwireError::DecodeObjectVarChar)?; // TODO: bubble error
 
                     payload.push(HWPayload { magic, value });
                     offset = vlq_offset + data_len as usize;
@@ -82,7 +82,7 @@ impl HWMessage {
                 _ => {
                     let bytes: [u8; 4] = bin[cursor..cursor+4]
                         .try_into()
-                        .map_err(|_| HyprwireError::WIP)?; // TODO: bubble error
+                        .map_err(|_| HyprwireError::DecodeObjectU8)?; // TODO: bubble error
 
                     let value = HWValue::from_slice(magic, &bytes)?;
 
