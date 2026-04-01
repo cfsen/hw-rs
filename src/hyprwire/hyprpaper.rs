@@ -97,11 +97,11 @@ impl HyprpaperIPC {
         }
 
         let Some(manager_id) = manager_obj.payload.get(0)
-        else { return Err(HyprwireError::WIP) };
+        else { return Err(HyprwireError::HyprpaperGetManagerObjNoPayload) };
 
         match manager_id.value {
             HWValue::Uint(id) => Ok(id),
-            _ => Err(HyprwireError::WIP),
+            _ => Err(HyprwireError::HyprpaperGetManagerObjId),
         }
     }
 
@@ -114,11 +114,11 @@ impl HyprpaperIPC {
         }
 
         let Some(wallpaper_id) = expect_obj.payload.get(0)
-        else { return Err(HyprwireError::WIP) };
+        else { return Err(HyprwireError::HyprpaperGetWallpaperObjNoPayload) };
 
         match wallpaper_id.value {
             HWValue::Uint(id) => Ok(id),
-            _ => Err(HyprwireError::WIP),
+            _ => Err(HyprwireError::HyprpaperGetWallpaperObjId),
         }
     }
 
@@ -154,9 +154,10 @@ impl HyprpaperIPC {
     fn get_paper_protocol(stream: &mut UnixStream, client_paper_version: &str) -> Result<u32, HyprwireError> {
         // pre-process requested hyprpaper version
         let Some((_, version_str)) = client_paper_version.split_once("@") 
-        else { return Err(HyprwireError::WIP) };
+        else { return Err(HyprwireError::HyprpaperGetProtocolInvalidVersionStr) };
 
-        let requested_version: u32 = version_str.parse::<u32>().map_err(|_| HyprwireError::WIP)?;
+        let requested_version: u32 = version_str.parse::<u32>()
+            .map_err(|_| HyprwireError::HyprpaperGetProtocolUintParseFailure)?;
 
         // read offered versions from socket
         let expect_supported_versions = HWMessage::try_from(stream)?;
