@@ -33,6 +33,7 @@ pub enum HyprwireError {
     MessageKindUnknownKey,
 
     MessageStreamRead(std::io::Error),
+    MessageStreamLength,
 
     SocketConnect(std::io::Error),
     SocketProtocolError,
@@ -75,6 +76,7 @@ impl Display for HyprwireError {
 
 
             HyprwireError::MessageStreamRead(error) => write!(f, "Message: Stream read error: {}", error),
+            HyprwireError::MessageStreamLength => write!(f, "Message: Stream error: Object too short."),
 
             HyprwireError::SocketConnect(e) => write!(f, "Socket:Connect: {}", e),
             HyprwireError::SocketProtocolError => write!(f, "Socket:Protocol error"),

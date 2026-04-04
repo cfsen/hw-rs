@@ -115,7 +115,7 @@ impl TryFrom<&mut UnixStream> for HWMessage {
             },
             HWMessageKind::Generic => {
                 if n <= 6 {
-                    return Err(HyprwireError::WIP);
+                    return Err(HyprwireError::MessageStreamLength);
                 }
 
                 // NOTE: first four bytes of generic messages contain object id
