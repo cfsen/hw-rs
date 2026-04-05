@@ -264,7 +264,7 @@ impl HWValue {
             HWMagic::Object => {
                 println!("error:from_slice: missed object decoding detour, use HWMessage::try_from");
                 println!("error:from_slice:bin: {:?}", bin);
-                return Err(HyprwireError::WIP); // TODO: 
+                return Err(HyprwireError::DecodeObjectMissedDetour);
             },
             HWMagic::Fd => HWValue::Fd,
         };
