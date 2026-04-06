@@ -174,7 +174,7 @@ pub enum HWValue {
     Varchar(String),
     ArrayUint(Vec<u32>),
     ArrayVarchar(Vec<String>),
-    Object(u32, String),
+    Object(u32),
     Fd,
 }
 impl HWValue {
@@ -283,7 +283,7 @@ impl Display for HWValue {
             HWValue::Varchar(v) => write!(f, "varchar({})", v),
             HWValue::ArrayUint(items) => write!(f, "array<uint>{:?}", items),
             HWValue::ArrayVarchar(items) => write!(f, "array<varchar>{:?}", items),
-            HWValue::Object(id, name) => write!(f, "object({}, {})", id, name),
+            HWValue::Object(id) => write!(f, "object({})", id),
             HWValue::Fd => write!(f, "fd"),
         }
     }

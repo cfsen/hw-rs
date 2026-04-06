@@ -43,7 +43,7 @@ impl HWMessage {
     }
     pub fn template_generic(object_id: u32, method_id: u32, args: Vec<HWPayload>) -> Self {
         let mut payload = vec![
-            HWPayload::compose_object(object_id, String::new()),
+            HWPayload::compose_object(object_id),
             HWPayload::compose_uint(method_id),
         ];
         payload.extend(args);

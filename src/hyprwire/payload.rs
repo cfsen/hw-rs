@@ -25,8 +25,8 @@ impl HWPayload {
     pub fn compose_varchar(varchar: String) -> Self {
         Self::compose(HWMagic::Varchar, HWValue::Varchar(varchar))
     }
-    pub fn compose_object(object_id: u32, object: String) -> Self {
-        Self::compose(HWMagic::Object, HWValue::Object(object_id, object))
+    pub fn compose_object(object_id: u32) -> Self {
+        Self::compose(HWMagic::Object, HWValue::Object(object_id))
     }
     pub fn compose_fd() -> Self {
         Self::compose(HWMagic::Fd, HWValue::Fd)
@@ -52,7 +52,7 @@ impl HWPayload {
             HWValue::Varchar(_) => magic == HWMagic::Varchar,
             HWValue::ArrayUint(_) => magic == HWMagic::Array,
             HWValue::ArrayVarchar(_) => magic == HWMagic::Array,
-            HWValue::Object(_, _) => magic == HWMagic::Object,
+            HWValue::Object(_) => magic == HWMagic::Object,
             HWValue::Fd => magic == HWMagic::Fd,
         }
     }
@@ -102,10 +102,8 @@ impl HWPayload {
                     buf.extend(s.as_bytes());
                 }
             },
-            HWValue::Object(id, _name) => { // TODO: clean up
+            HWValue::Object(id) => {
                 buf.extend(id.to_le_bytes());
-                // buf.extend(VLQ::encode(name.len() as u64));
-                // buf.extend(name.as_bytes());
             }
             HWValue::Fd => { },
         }
