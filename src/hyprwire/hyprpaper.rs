@@ -68,7 +68,7 @@ impl HyprpaperIPC {
         Self::socket_write(stream, HWMessage::template_hs_ack(hw_protocol_ver))?;
 
         // check available hyprpaper protocols
-        let client_paper_version = "hyprpaper_core@1";
+        let client_paper_version = "hyprpaper_core@2";
         let paper_protocol_ver = Self::get_paper_protocol(stream, client_paper_version)?;
 
         // bind to hyprpaper protocol
