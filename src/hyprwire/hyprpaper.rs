@@ -2,7 +2,15 @@
 
 use std::{io::Write, os::unix::net::UnixStream};
 
-use crate::hyprwire::{error::HyprwireError, message::HWMessage, payload::HWPayload, types::{HWMessageKind, HWValue}};
+use crate::hyprwire::{
+    error::HyprwireError,
+    message::HWMessage,
+    payload::HWPayload,
+    types::{
+        HWMessageKind,
+        HWValue
+    }
+};
 
 pub struct HyprpaperIPCHandshake {
     seq: u32,
@@ -31,23 +39,23 @@ impl HyprpaperIPC {
 
         // wallpaper
         Self::socket_write(&mut stream, HWMessage::template_generic(
-            hs.wallpaper_id,
-            HyprpaperMethodId::SetWallpaperPath as u32,
-            vec![HWPayload::compose_varchar(path.to_string())]
+                hs.wallpaper_id,
+                HyprpaperMethodId::SetWallpaperPath as u32,
+                vec![HWPayload::compose_varchar(path.to_string())]
         ))?;
 
         // target monitor
         Self::socket_write(&mut stream, HWMessage::template_generic(
-            hs.wallpaper_id,
-            HyprpaperMethodId::SetTargetMonitor as u32,
-            vec![HWPayload::compose_varchar(monitor_id.to_string())]
+                hs.wallpaper_id,
+                HyprpaperMethodId::SetTargetMonitor as u32,
+                vec![HWPayload::compose_varchar(monitor_id.to_string())]
         ))?;
 
         // apply
         Self::socket_write(&mut stream, HWMessage::template_generic(
-            hs.wallpaper_id,
-            HyprpaperMethodId::Apply as u32,
-            vec![]
+                hs.wallpaper_id,
+                HyprpaperMethodId::Apply as u32,
+                vec![]
         ))?;
 
         // wait for response before closing socket
@@ -81,9 +89,9 @@ impl HyprpaperIPC {
 
         // request wallpaper object
         Self::socket_write(stream, HWMessage::template_generic(
-            manager_id,
-            HyprwireMethodId::GetWallpaperObject as u32,
-            vec![HWPayload::compose_seq(1)]
+                manager_id,
+                HyprwireMethodId::GetWallpaperObject as u32,
+                vec![HWPayload::compose_seq(1)]
         ))?;
         let wallpaper_id = Self::get_wallpaper_object(stream)?;
 
@@ -154,10 +162,10 @@ impl HyprpaperIPC {
     fn get_paper_protocol(stream: &mut UnixStream, client_paper_version: &str) -> Result<u32, HyprwireError> {
         // pre-process requested hyprpaper version
         let Some((_, version_str)) = client_paper_version.split_once("@") 
-        else { return Err(HyprwireError::HyprpaperGetProtocolInvalidVersionStr) };
+            else { return Err(HyprwireError::HyprpaperGetProtocolInvalidVersionStr) };
 
-        let requested_version: u32 = version_str.parse::<u32>()
-            .map_err(|_| HyprwireError::HyprpaperGetProtocolUintParseFailure)?;
+            let requested_version: u32 = version_str.parse::<u32>()
+                .map_err(|_| HyprwireError::HyprpaperGetProtocolUintParseFailure)?;
 
         // read offered versions from socket
         let expect_supported_versions = HWMessage::try_from(stream)?;
